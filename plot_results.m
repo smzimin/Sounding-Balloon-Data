@@ -1,10 +1,10 @@
 function plot_results( shirota, fgr, num, matrE, matrT, height, numOfLevels, interval )
 if shirota == 0
     figure(1);
-    plot(matrE(1,:), height, 'LineWidth', 1.5); hold on;
+    plot(matrE(1,:), height, 'LineWidth', 1.5, 'LineSmoothing', 'on'); hold on;
     for k = 1:numOfLevels  
-        plot([interval(1,k) interval(2,k)],[height(k) height(k)],'r*','LineWidth',1);
-        plot([interval(1,k) interval(2,k)],[height(k) height(k)],'r','LineWidth',1);  
+        plot([interval(1,k) interval(2,k)],[height(k) height(k)],'r*','LineWidth',1, 'LineSmoothing', 'on');
+        plot([interval(1,k) interval(2,k)],[height(k) height(k)],'r','LineWidth',1, 'LineSmoothing', 'on');  
     end
     xlabel('Угол поворота, градусы','FontName','Arial Cyr','FontSize',20);
     ylabel('Высота, метры','FontName','Arial Cyr','FontSize',20);
@@ -12,7 +12,7 @@ if shirota == 0
 else
     figure(fgr);
     subplot (1,2,num)
-    plot(matrE(1,:),height,'LineWidth',1.5); hold on;
+    plot(matrE(1,:),height,'LineWidth', 1.5, 'LineSmoothing', 'on'); hold on;
     for k = 1:numOfLevels  
         plot([interval(1,k) interval(2,k)],[height(k) height(k)],'r*','LineWidth',1);
         plot([interval(1,k) interval(2,k)],[height(k) height(k)],'r','LineWidth',1);  

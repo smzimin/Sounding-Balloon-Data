@@ -12,7 +12,7 @@ height = 0:step:highestLevel - step;
 
 for shirota = 0
 [ left, right, fgr, num ] = switch_length( shirota );
-angle = make_table( highestLevel, numOfLevels, t, h, left, right );
-[ numOfTimes, matrT, matrE, matrD, interval ] = calculate_means_and_conf_interval( angle, numOfLevels );
-plot_results( shirota, fgr, num, matrE, matrT, height, numOfLevels, interval );
+table_of_ks = make_table_of_ks( highestLevel, numOfLevels, t, h, left, right );
+%[ numOfTimes, matrT, matrE, matrD, interval ] = calculate_means_and_conf_interval( angle, numOfLevels );
+plot_ks( table_of_ks, h );
 end

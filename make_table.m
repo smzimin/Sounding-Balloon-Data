@@ -1,8 +1,13 @@
 function [ table ] = make_table( highestLevel, numOfLevels, t, h, left, right )
 table = [];
-for mon = 3:12 
+for mon = 3:12
+    mon
 for day = 1:31
-    fid=fopen(['BUFRG00F.20140' num2str(mon*100+day) '.00']);
+    if mon < 10
+        fid=fopen(['BUFRG00F.20140' num2str(mon*100+day) '.00']);
+    else
+        fid=fopen(['BUFRG00F.2014' num2str(mon*100+day) '.00']);
+    end
     if fid <= 0
         continue;
     end
