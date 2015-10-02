@@ -46,14 +46,14 @@ p = 0; izl = 0;
 
 for i = 1:length(t)
     
-    if t(1,i) >= z0 && p == 0
+    if t(i) >= z0 && p == 0
         p = 1;
         izl = i;
     end
     
-    if t(1,i) <= z0
+    if t(i) <= z0
         
-        x = qLeft*t(1,i);
+        x = qLeft*t(i);
         
         u(1,i) = C(3,1)*cos(x)*sinh(x) + C(4,1)*sin(x)*cosh(x) - U*cos(x)*cosh(x);
         v(1,i) = C(3,1)*sin(x)*cosh(x) - C(4,1)*cos(x)*sinh(x) - U*sin(x)*sinh(x);
@@ -62,7 +62,7 @@ for i = 1:length(t)
         v1(1,i) = qLeft * (C(3,1)*(cos(x)*cosh(x) + sin(x)*sinh(x)) + C(4,1)*(-cos(x)*cosh(x) + sin(x)*sinh(x)) - U*(cos(x)*sinh(x) + sin(x)*cosh(x)));
         
     else
-        x = qRight*t(1,i);
+        x = qRight*t(i);
         
         u(1,i) = (C(1,1)*sin(x) + C(2,1)*cos(x))*exp(-x);
         v(1,i) = (C(1,1)*cos(x) - C(2,1)*sin(x))*exp(-x);
