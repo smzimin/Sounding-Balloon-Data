@@ -1,4 +1,7 @@
-function [ k_exact, fr, shir ] = make_table_of_ks_polynoms( regularization, shir_vis, fin_par, data )
+function [ k_exact, fr, shir ] = make_table_of_ks_splines_v2( regularization, ...
+    shir_vis, fin_par, data, plot_Ik )
+k_exact = []; fr = 0; shir = 0;
+
 %% params
 alpha = regularization(1);
 beta = regularization(2);
@@ -48,42 +51,46 @@ for i = 1:length(dat1(1,:))
            continue;
        end
        
-       %% set polinomial degree and interpolate
-       if length(p) <= 9
-           n = 3;
-       elseif length(p) <= 21
-           n = round(length(p)/3);
-       else
-           n = 7;
-       end
-       u = polyfit(p, speed .* sin(a), n);
-       v = polyfit(p, speed .* cos(a), n);
+       %% interpolate
+%        n = 1;
+%        u = spap2(n,4,p,speed .* sin(a));
+%        v = spap2(n,4,p,speed .* cos(a));
+       
+%        u = csaps(p,speed .* sin(a));
+%        v = csaps(p,speed .* cos(a));
+
+       u = spapi(2, p,speed .* sin(a));
+       v = spapi(2, p,speed .* cos(a));
        
        %% get derivatives
-       %[du1, du2, du3, dv1, dv2, dv3] = get_derivatives(u,v);
+       % [du1, du2, du3, dv1, dv2, dv3] = get_derivatives(u,v);
        
        %% some plots
-       plot_godograph(u, v, h, speed, a)
+       %plot_godograph(u, v, h, speed, a)
+       plot_uv(u, v, h, speed, a, p)
        %plot_derivatives(u, v, h, speed, a, p)
-       %plot(polyval(du1,h).^2 + polyval(dv1,h).^2, h, 'r', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+       %plot(ppval(du1,h).^2 + ppval(dv1,h).^2, h, 'r', 'LineWidth', 2.5, 'LineSmoothing', 'on');
        
        %% main calculations
-       shir = 0.00001*dat1(5,i);
-       l = 2*7.2921*(10^-5)*sin(pi/180*shir);
+%        shir = 0.00001*dat1(5,i);
+%        l = 2*7.2921*(10^-5)*sin(pi/180*shir);
        
-       if alpha == 0
-           k_exact = find_k_ver4_polynomial( u, v, h, l);
-       else
-           k_exact = find_k_ver5(alpha, beta, u, v, h, ...
-               l*10^8, smallk, bigk, eps, 0 )*10^-8;
-       end
-        
+%        if plot_Ik == 0
+%            if alpha == 0
+%                k_exact = find_k_ver4( u, v, h, l);
+%            else
+%                k_exact = find_k_ver5_splines(alpha, beta, u, v, h, ...
+%                    l*10^8, smallk, bigk, eps, 0 )*10^-8;
+%            end
+%        else
+%            find_k_splines_plot_Ik(alpha, beta, u, v, h, l, smallk,...
+%                bigk, eps )
+%        end
+%        %% find k_const and compare
+%        [k_const, I1, I2] = k_const_and_integrals(u, v, h, k_exact, l);
+%        fr = I1 / I2
 
-       %% find k_const and compare
-       [k_const, I1, I2] = k_const_and_integrals(u, v, h, k_exact, l);
-       fr = I1 / I2
-
-        
+       %% find uv using k(z)
        %[u_vosst, v_vosst] = uv_twice(u, v, l, k_exact, h, speed, a, p);
 
        break
@@ -134,10 +141,10 @@ end
 function plot_godograph(u, v, h, speed, a)
 figure();
 subplot(121)
-plot(polyval(u,h), polyval(v,h), 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
+plot(ppval(u,h), ppval(v,h), 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
 plot(speed .* sin(a), speed .* cos(a), 'r:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
-plot(polyval(u,h(1)), polyval(v,h(1)), 'g:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
-plot(polyval(u,h(end)), polyval(v,h(end)), 'y:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(ppval(u,h(1)), ppval(v,h(1)), 'g:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(ppval(u,h(end)), ppval(v,h(end)), 'y:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
 xlabel('u','FontName','Arial Cyr','FontSize',20);
 ylabel('v','FontName','Arial Cyr','FontSize',20);
 title('Годограф','FontName','Arial Cyr','FontSize',20);
@@ -146,59 +153,65 @@ end
 function plot_derivatives(u, v, h, speed, a, p)
 [du1, du2, du3, dv1, dv2, dv3] = get_derivatives(u,v);
 figure(6);
-plot(polyval(v,h), h, 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
-plot(polyval(dv1,h), h, 'r', 'LineWidth', 2.5, 'LineSmoothing', 'on');
-plot(polyval(dv2,h), h, 'g', 'LineWidth', 2.5, 'LineSmoothing', 'on');
-plot(polyval(dv3,h), h, 'y', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(ppval(v,h), h, 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
+plot(ppval(dv1,h), h, 'r', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(ppval(dv2,h), h, 'g', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(ppval(dv3,h), h, 'y', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(speed .* cos(a), p, 'r:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+end
+
+function plot_uv(u, v, h, speed, a, p)
+figure(6);
+plot(fnval(u,h), h, 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
+plot(speed .* sin(a), p, 'r:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+figure(7);
+plot(fnval(v,h), h, 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
 plot(speed .* cos(a), p, 'r:o', 'LineWidth', 2.5, 'LineSmoothing', 'on');
 end
 
 function [du1, du2, du3, dv1, dv2, dv3] = get_derivatives(u,v)
-du1 = polyder(u);
-du2 = polyder(du1);
-du3 = polyder(du2);
+du1 = fnder(u, 1);
+du2 = fnder(u, 2);
+du3 = fnder(u, 3);
 
-dv1 = polyder(v);
-dv2 = polyder(dv1);
-dv3 = polyder(dv2);
+dv1 = fnder(v, 1);
+dv2 = fnder(v, 2);
+dv3 = fnder(v, 3);
 end
 
 function [k_const, I1, I2] = k_const_and_integrals(u, v, h, k_exact, l)
 [du1, du2, ~, dv1, dv2, ~] = get_derivatives(u,v);
-k_const = l*sum(polyval(u,h).*polyval(dv2,h)-polyval(v,h).*polyval(du2,h)) / ...
-            sum(polyval(dv2,h).^2+polyval(du2,h).^2);
+k_const = l*sum(ppval(u,h).*ppval(dv2,h)-ppval(v,h).*ppval(du2,h)) / ...
+            sum(ppval(dv2,h).^2+ppval(du2,h).^2);
     
 %figure(1);
 plot(k_const*ones(size(h)), h, 'r', 'LineWidth', 1.5, 'LineSmoothing', 'on');
         
-I1 = (polyval(du2,h).*k_exact(1,:)' + polyval(du1,h).*k_exact(2,:)' ...
-    + l*polyval(v,h)).^2 + (polyval(dv2,h).*k_exact(1,:)' ...
-    + polyval(dv1,h).*k_exact(2,:)' - l*polyval(u,h)).^2 ;
+I1 = (ppval(du2,h).*k_exact(1,:)' + ppval(du1,h).*k_exact(2,:)' ...
+    + l*ppval(v,h)).^2 + (ppval(dv2,h).*k_exact(1,:)' ...
+    + ppval(dv1,h).*k_exact(2,:)' - l*ppval(u,h)).^2 ;
 
-I2_const = (polyval(du2,h)*k_const + l*polyval(v,h)).^2 + ...
-(polyval(dv2,h)*k_const - l*polyval(u,h)).^2;
+I2_const = (ppval(du2,h)*k_const + l*ppval(v,h)).^2 + ...
+(ppval(dv2,h)*k_const - l*ppval(u,h)).^2;
         
 I1 = trapz(h,I1);
 I2 = trapz(h,I2_const);
 end
 
 function [u_vosst, v_vosst] = uv_twice(u, v, l, k_exact, h, speed, a, p)
-% k = spline(h, k_exact(1,:));
-% dk = spline(h, k_exact(2,:));
+k = spline(h, k_exact(1,:));
+dk = spline(h, k_exact(2,:));
 
-k = polyfit(h, k_exact(1,:)', 4);
-dk = polyfit(h, k_exact(1,:)', 4);
-
-veter0 = [polyval(u,h(1)) polyval(polyder(u),h(1)) polyval(v,h(1)) polyval(polyder(v),h(1))];
+veter0 = [ppval(u,h(1)) ppval(fnder(u,1),h(1)) ppval(v,h(1)) ppval(fnder(v,1),h(1))];
 [u_vosst, v_vosst] = vosstanovitelnaya_function( k, dk, h, l, veter0);
 
 figure(3);
 plot(speed .* sin(a), p, 'r:o', 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
-plot(polyval(u, h), h, 'g', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(ppval(u, h), h, 'g', 'LineWidth', 2.5, 'LineSmoothing', 'on');
 plot(u_vosst, h, 'LineWidth', 2.5, 'LineSmoothing', 'on');
 figure(4);
 plot(speed .* cos(a), p, 'r:o', 'LineWidth', 2.5, 'LineSmoothing', 'on'); hold on;
-plot(polyval(v, h), h, 'g', 'LineWidth', 2.5, 'LineSmoothing', 'on');
+plot(ppval(v, h), h, 'g', 'LineWidth', 2.5, 'LineSmoothing', 'on');
 plot(v_vosst, h, 'LineWidth', 2.5, 'LineSmoothing', 'on');
 end
 
@@ -214,8 +227,9 @@ u_vosst = y(:,1)';
 v_vosst = y(:,3)';
 
 function dydx = odefun(x,y)
-kz = polyval(k, x); 
-dkz = polyval(dk, x);
+    
+kz = ppval(k, x); 
+dkz = ppval(dk, x);
 
 dydx = [y(2);
     -(y(2)*dkz + l*y(3)  ) / kz;

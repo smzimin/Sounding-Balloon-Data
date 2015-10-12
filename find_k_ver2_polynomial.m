@@ -1,4 +1,5 @@
-function k = find_k_ver2_polynomial(alpha, beta, u, v, h, l, smallk, bigk, step, print_errors )
+function k = find_k_ver2_polynomial(alpha, beta, u, v, h, l, ...
+    smallk, bigk, step, print_errors )
 
 opt = odeset('AbsTol', 1e-7, 'RelTol', 1e-7, 'MaxStep', (h(end)-h(1))/1000);
 
@@ -28,14 +29,6 @@ vb = polyval(v,h(end));
 d1vb = polyval(dv1,h(end));
 d2vb = polyval(dv2,h(end));
 
-u_temp = polyval(u,h);
-v_temp = polyval(v,h);
-du1_temp = polyval(du1,h);
-dv1_temp = polyval(dv1,h);
-du2_temp = polyval(du2,h);
-dv2_temp = polyval(dv2,h);
-
-
 eps = 10^-3;
 
 close all
@@ -64,11 +57,11 @@ for i = 1:length(k0)
       
        plot(k(1,:), h, 'LineWidth', 2, 'LineSmoothing', 'on'); hold on;
     
-    if abs(errors(i)) < eps
-        k_opt = k0(i)
-        %errors(i)
-     %   plot(k(1,:), h, 'r', 'LineWidth', 1.5, 'LineSmoothing', 'on'); hold on;
-    end
+%     if abs(errors(i)) < eps
+%         k_opt = k0(i);
+%         %errors(i)
+%      %   plot(k(1,:), h, 'r', 'LineWidth', 1.5, 'LineSmoothing', 'on'); hold on;
+%     end
     end
 end
 

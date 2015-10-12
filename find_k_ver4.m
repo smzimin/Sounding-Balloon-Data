@@ -1,5 +1,5 @@
 function k = find_k_ver4( u, v, h, l)
-opt = odeset('AbsTol', 1e-12, 'RelTol', 1e-12, 'MaxStep', (h(end)-h(1))/1000);
+opt = odeset('AbsTol', 1e-7, 'RelTol', 1e-7, 'MaxStep', (h(end)-h(1))/1000);
 
 du1 = fnder(u, 1);
 du2 = fnder(u, 2);
@@ -28,10 +28,10 @@ d1vb = ppval(dv1, h(end));
 d2vb = ppval(dv2, h(end));
 
 
-[~, k1] = ode15s(@(t, y) odefun(t, y), h, [0 1], opt);
+[~, k1] = ode45(@(t, y) odefun(t, y), h, [0 1], opt);
 k1 = k1';
 
-[~, k2] = ode15s(@(t, y) odefun(t, y), h, [1 0], opt);
+[~, k2] = ode45(@(t, y) odefun(t, y), h, [1 0], opt);
 k2 = k2';
 
 a11 = (d1ua^2+d1va^2)*k1(2,1) + (d2ua*d1ua+d2va*d1va)*k1(1,1);

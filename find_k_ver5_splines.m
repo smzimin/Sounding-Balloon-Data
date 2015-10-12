@@ -1,32 +1,34 @@
-function [k, wrong] = find_k_ver5(alpha, beta, u, v, h, l, a, b, eps, print_errors )
+function [k, wrong] = find_k_ver5_splines(alpha, beta, u, v, h, l, a, b, eps, print_errors )
 wrong = 0;
 k = [];
 
-opt = odeset('AbsTol', 1e-12, 'RelTol', 1e-12, 'MaxStep', (h(end)-h(1))/1000);
+opt = odeset('AbsTol', 1e-7, 'RelTol', 1e-7, 'MaxStep', (h(end)-h(1))/1000);
 
-du1 = polyder(u);
-du2 = polyder(du1);
-du3 = polyder(du2);
-dv1 = polyder(v);
-dv2 = polyder(dv1);
-dv3 = polyder(dv2);
+du1 = fnder(u, 1);
+du2 = fnder(u, 2);
+du3 = fnder(u, 3);
 
-ua = polyval(u,h(1));
-d1ua = polyval(du1,h(1));
-d2ua = polyval(du2,h(1));
-
-va = polyval(v,h(1));
-d1va = polyval(dv1,h(1));
-d2va = polyval(dv2,h(1));
+dv1 = fnder(v, 1);
+dv2 = fnder(v, 2);
+dv3 = fnder(v, 3);
 
 
-ub = polyval(u,h(end));
-d1ub = polyval(du1,h(end));
-d2ub = polyval(du2,h(end));
+ua = ppval(u, h(1));
+d1ua = ppval(du1, h(1));
+d2ua = ppval(du2, h(1));
 
-vb = polyval(v,h(end));
-d1vb = polyval(dv1,h(end));
-d2vb = polyval(dv2,h(end));
+va = ppval(v, h(1));
+d1va = ppval(dv1, h(1));
+d2va = ppval(dv2, h(1));
+
+
+ub = ppval(u, h(end));
+d1ub = ppval(du1, h(end));
+d2ub = ppval(du2, h(end));
+
+vb = ppval(v, h(end));
+d1vb = ppval(dv1, h(end));
+d2vb = ppval(dv2, h(end));
 
 % aset = -[-10.^(10:-1:-10) 10.^(-10:10)];
 % fa = f(aset(1));
@@ -116,13 +118,13 @@ end
 
 function dydx = odefun(x,y)
     
-d1uz = polyval(du1,x);
-d2uz = polyval(du2,x);
-d3uz = polyval(du3,x);
+d1uz = ppval(du1, x);
+d2uz = ppval(du2, x);
+d3uz = ppval(du3, x);
 
-d1vz = polyval(dv1,x);
-d2vz = polyval(dv2,x);
-d3vz = polyval(dv3,x);
+d1vz = ppval(dv1, x);
+d2vz = ppval(dv2, x);
+d3vz = ppval(dv3, x);
 
 dydx = [y(2);
     -(2*(d2uz*d1uz+d2vz*d1vz)*y(2) + (d3uz*d1uz+d3vz*d1vz)*y(1) - ...
